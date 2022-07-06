@@ -1,3 +1,4 @@
+/* * * * * slide container * * * * */
 .slide {
     overflow: hidden;
     transition-duration: .8s;
@@ -5,10 +6,12 @@
     transition-timing-function: ease-in;
 }
 
-.slide > * {
+.slide * {
+    transition-duration: .8s;
     transition-property: height,
     opacity,
     transform;
+    transition-timing-function: ease-in;
 }
 
 .slide-0 {
@@ -35,17 +38,84 @@
     text-align: left;
     font-size: 50px;
 
-    transition-duration: .8s;
     transition-timing-function: cubic-bezier(0, 2, 1, 2);
+}
+
+.slide-1 {
+    position: absolute;
+    z-index: 100;
+    top: 50%;
+    left: 50%;
+    width: 1200px;
+    transform: translate(-50%, -50%);
+
+    margin: 0;
+    padding: 0;
+
+    background: #333;
+    color: #ddd;
+    box-shadow: 3px 3px 5px 2px #000;
+}
+
+/* * * * * schedule * * * * */
+.schedule {
+    table-layout: fixed;
+    width: 100%;
+
+    text-align: left;
+    font-size: 25px;
+}
+
+.schedule * {
+    padding: 8px;
+    transition-timing-function: cubic-bezier(0, 2, 1, 2);
+}
+
+.schedule th:nth-child(1), .schedule td:nth-child(1) {
+    box-shadow: 1px 1px 5px 1px #99ff99 inset;
+}
+
+.schedule th:nth-child(2), .schedule td:nth-child(2) {
+    box-shadow: 1px 1px 5px 1px #ff66cc inset;
+}
+
+.schedule th:nth-child(3), .schedule td:nth-child(3) {
+    box-shadow: 1px 1px 5px 1px #ffcc66 inset;
+}
+
+.schedule th:nth-child(4), .schedule td:nth-child(4) {
+    box-shadow: 1px 1px 5px 1px #0099ff inset;
+}
+
+.schedule th:nth-child(5), .schedule td:nth-child(5) {
+    box-shadow: 1px 1px 5px 1px #ffff99 inset;
+}
+
+.schedule th:nth-child(6), .schedule td:nth-child(6) {
+    box-shadow: 1px 1px 5px 1px #ff5050 inset;
+}
+
+.schedule span {
+    display: block;
+    height: 100px;
+
+    background: #ddd;
+    color: #333;
+    border-radius: 5px;
+    box-shadow: 3px 3px 5px 2px #000;
 }
 
 /* * * * * status * * * * */
 .flat {
-    height: 0;
+    height: 0 !important;
 }
 
 .invis {
-    opacity: 0;
+    opacity: 0 !important;
+}
+
+.shrink {
+    transform: scale(0);
 }
 
 /* * * * * status for js logic * * * * */
