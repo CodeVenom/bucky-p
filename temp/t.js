@@ -10,12 +10,26 @@ let done = false;
 let seconds = 0;
 let spawns = 0;
 
+// externally set by slides.js
+let currentPresentationStack = presentationStack;
+let desiredSlideSteps = 0;
+
+// TODO: break down into multiple functions
 function step(timestamp) {
     if (start === undefined) {
         start = timestamp;
     }
+    // TODO: need to improve this => maybe calculate current and previous tick and use this as a basis
+    const nextTick = Math.floor(timestamp / 100) !== Math.floor(checkpoint / 100);
     const nextSecond = Math.floor(timestamp / 1000) !== Math.floor(checkpoint / 1000);
     const elapsed = timestamp - start;
+
+    if (nextTick) {
+        if (0 < desiredSlideSteps) {
+            currentPresentationStack.shiftExe();
+            desiredSlideSteps--;
+        }
+    }
 
     if (nextSecond) {
         seconds++;
@@ -41,4 +55,4 @@ function step(timestamp) {
     }
 }
 
-// window.requestAnimationFrame(step);
+window.requestAnimationFrame(step);

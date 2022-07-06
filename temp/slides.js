@@ -1,5 +1,6 @@
 // - - - - - slides handling - - - - -
 const DEFAULT_STATUS_OPTIONS = {
+    batchKey: undefined,
     invert: false,
 };
 
@@ -7,9 +8,9 @@ const RESET_STACK = [
     slide(0, invis),
     slide(0, flatten),
     slideParts(0, invis_offset),
-    slide(0, invertStatus(invis)),
+    slide(0, withOptions(invis).invert().result),
     slide(1, invis),
-    slidePartsNested(1, shrink, 3),
+    slidePartsNested(1, withOptions(shrink).batch('foo').result, 5),
 ];
 
 let presentationStack = [];
@@ -40,12 +41,11 @@ function randomizedStatus(e, s) {
 
 function pushStatusToBackStack(
     e,
-    o = DEFAULT_STATUS_OPTIONS,
+    o = {...DEFAULT_STATUS_OPTIONS},
     ...s
 ) {
     let flag = !o.invert;
     const f = _ => {
-        log(s);
         if (flag) {
             e.classList.add.apply(e.classList, s);
         } else {
@@ -54,6 +54,7 @@ function pushStatusToBackStack(
         flag = !flag;
         randomizedStatus(e, s);
     };
+    f.slideOptions = o;
     presentationBackStack.unshift(f);
 }
 
@@ -90,20 +91,25 @@ function invis_offset(e, o) {
     );
 }
 
-// TODO: define this as a function prototype
-function invertStatus(f) {
-    return withOptions(
-        f,
-        {
-            invert: true,
+function withOptions(f) {
+    const x = {
+        options: {...DEFAULT_STATUS_OPTIONS},
+        result: e => {
+            f(e, x.options);
         },
-    );
-}
-
-function withOptions(f, o) {
-    return e => {
-        f(e, o);
     };
+
+    x.batch = key => {
+        x.options.batchKey = key;
+        return x;
+    };
+
+    x.invert = _ => {
+        x.options.invert = true;
+        return x;
+    };
+
+    return x;
 }
 
 function slide(index, f) {
@@ -156,12 +162,36 @@ function reset() {
     presentationBackStack.shiftExeAll();
 }
 
+function slideStep(stack) {
+    if (stack.length < 1) {
+        return;
+    }
+
+    // TODO: consider differentiating between instant batch and animation frame batch
+    // TODO: find a more elegant solution for this
+    const f = stack[0];
+    const batchKey = f.slideOptions.batchKey;
+    if (batchKey) {
+        let counter = 0;
+        for (const item of stack) {
+            if (item.slideOptions.batchKey) {
+                counter++;
+            }
+        }
+        currentPresentationStack = stack;
+        desiredSlideSteps = counter;
+        return;
+    }
+
+    stack.shiftExe();
+}
+
 function back() {
     log('back');
-    presentationBackStack.shiftExe()
+    slideStep(presentationBackStack);
 }
 
 function next() {
     log('next');
-    presentationStack.shiftExe()
+    slideStep(presentationStack);
 }
