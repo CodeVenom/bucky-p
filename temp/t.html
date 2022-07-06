@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Something</title>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="https://kit.fontawesome.com/a1f6d2863d.js" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+
+        html {
+            background: #fafafa;
+            font-family: 'Roboto Mono', Geneva, Verdana, monospace;
+            font-size: 16px;
+        }
+
+        body {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            margin: 0;
+
+            background: #33cccc;
+        }
+
+        body > i {
+            position: absolute;
+            top: -1000px;
+            left: -1000px;
+        }
+
+        footer {
+            display: none;
+        }
+
+        .color-0 {
+            color: #99ff99;
+        }
+
+        .color-1 {
+            color: #ff66cc;
+        }
+
+        .color-2 {
+            color: #ffcc66;
+        }
+
+        .color-3 {
+            color: #0099ff;
+        }
+
+        .color-4 {
+            color: #ffff99;
+        }
+
+        .color-5 {
+            color: #ff5050;
+        }
+
+        .icon-0 {
+            font-size: 50px;
+
+            transition-duration: .8s;
+            transition-property: font-size;
+            transition-timing-function: ease-in;
+        }
+
+        .tiny-font {
+            font-size: 1px;
+        }
+    </style>
+</head>
+<body>
+<footer>
+    <i class="gamepad-0 fa-solid fa-gamepad icon-0"></i>
+    <i class="leaf-0 fa-solid fa-leaf icon-0"></i>
+    <i class="clock-0 fa-regular fa-clock icon-0"></i>
+    <i class="maple-0 fa-brands fa-canadian-maple-leaf icon-0"></i>
+    <i class="laugh-0 fa-regular fa-face-laugh-beam icon-0"></i>
+    <i class="moon-0 fa-solid fa-moon icon-0"></i>
+    <i class="knight-0 fa-solid fa-chess-knight icon-0"></i>
+</footer>
+<script defer="defer" type="text/javascript">
+    const INNER_SPAWN_OFFSET = 200;
+    const MOVE_SPEED_MIN = 2;
+    const MOVE_SPEED_MAX = 10;
+    const SPAWN_CHANCE_MIN = 1;
+    const SPAWN_CHANCE_MAX = 4;
+    const SPAWN_SPEED = 1;
+
+    let start, checkpoint;
+    let done = false;
+    let seconds = 0;
+    let spawns = 0;
+
+    function step(timestamp) {
+        if (start === undefined) {
+            start = timestamp;
+        }
+        const nextSecond = Math.floor(timestamp / 1000) !== Math.floor(checkpoint / 1000);
+        const elapsed = timestamp - start;
+
+        if (nextSecond) {
+            seconds++;
+            // log('tick');
+
+            if (seconds % SPAWN_SPEED === 0) {
+                spawnRandom();
+            }
+        }
+
+        checkpoint = timestamp;
+        if (!done) {
+            const spawned = document.getElementsByClassName('spawned');
+            for (const i of spawned) {
+                i.classList.remove('tiny-font');
+                move(i);
+                if (isOutOfSight(i)) {
+                    i.remove();
+                }
+            }
+
+            window.requestAnimationFrame(step);
+        }
+    }
+
+    function spawnRandom() {
+        let count = SPAWN_CHANCE_MIN + Math.floor(Math.random() * (SPAWN_CHANCE_MAX - SPAWN_CHANCE_MIN));
+        while (0 < count--) {
+            spawn(
+                randomInt(cw() - INNER_SPAWN_OFFSET * 2),
+                randomInt(ch() - INNER_SPAWN_OFFSET * 2),
+            );
+        }
+    }
+
+    function spawn(x, y) {
+        // log('spawn');
+        let ox = 1000 + INNER_SPAWN_OFFSET - 50 + x;
+        let oy = 1000 + INNER_SPAWN_OFFSET - 50 + y;
+        let gamepad = document.getElementsByClassName(randomSpawnClass())[0];
+        let clone = gamepad.cloneNode();
+        clone.spatial = {
+            origin: {
+                x: ox,
+                y: oy,
+            },
+            position: {
+                x: ox,
+                y: oy,
+            },
+            direction: {
+                x: Math.random() - .5,
+                y: Math.random() - .5,
+            },
+            speed: {
+                base: MOVE_SPEED_MIN + Math.random() * (MOVE_SPEED_MAX - MOVE_SPEED_MIN),
+            },
+        }
+        clone.classList.add('spawned');
+        clone.classList.add(randomColorClass());
+        clone.classList.add('tiny-font');
+        clone.id = 'spawn-' + (spawns++);
+        move(clone);
+        document.body.append(clone);
+    }
+
+    function move(e) {
+        if (!'spatial' in e) {
+            return;
+        }
+
+        const p = e.spatial.position;
+        const d = e.spatial.direction;
+        const s = e.spatial.speed;
+
+        p.x += d.x * s.base;
+        p.y += d.y * s.base;
+
+        const tx = p.x + 'px';
+        const ty = p.y + 'px';
+
+        e.style.transform = `translate(${tx},${ty})`;
+    }
+
+    function isOutOfSight(e) {
+        const bb = e.getBoundingClientRect();
+        return bb.bottom < 0 || bb.right < 0 || bb.top > ch() || bb.left > cw();
+    }
+
+    function randomInt(max) {
+        return Math.floor(Math.random() * max);
+    }
+
+    function randomSpawnClass() {
+        const classes = [
+            'gamepad',
+            'leaf',
+            'clock',
+            'maple',
+            'laugh',
+            'moon',
+            'knight',
+        ];
+        const index = (Math.floor(Math.random() * classes.length) % classes.length);
+        return classes[index] + '-0';
+    }
+
+    function randomColorClass() {
+        return 'color-' + (Math.floor(Math.random() * 6) % 6);
+    }
+
+    function cw() {
+        return document.body.clientWidth;
+    }
+
+    function ch() {
+        return document.body.clientHeight;
+    }
+
+    log = console.log;
+
+    window.requestAnimationFrame(step);
+</script>
+</body>
+</html>
