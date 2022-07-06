@@ -1,0 +1,53 @@
+.slide {
+    overflow: hidden;
+    transition-duration: .8s;
+    transition-property: height, opacity, transform;
+    transition-timing-function: ease-in;
+}
+
+.slide > * {
+    transition-property: height,
+    opacity,
+    transform;
+}
+
+.slide-0 {
+    position: absolute;
+    z-index: 100;
+    top: 50%;
+    left: 50%;
+    width: 800px;
+    height: 450px;
+    transform: translate(-50%, -50%);
+
+    margin: 0;
+    padding: 0;
+
+    background: #333;
+    color: #ddd;
+    box-shadow: 3px 3px 5px 2px #000;
+}
+
+.slide-0 > p {
+    display: block;
+
+    padding: 0 0 0 25px;
+    text-align: left;
+    font-size: 50px;
+
+    transition-duration: .8s;
+    transition-timing-function: cubic-bezier(0, 2, 1, 2);
+}
+
+/* * * * * status * * * * */
+.flat {
+    height: 0;
+}
+
+.invis {
+    opacity: 0;
+}
+
+/* * * * * status for js logic * * * * */
+.offset {
+}
