@@ -1,6 +1,6 @@
 const INNER_SPAWN_OFFSET = 200;
-const MOVE_SPEED_MIN = 2;
-const MOVE_SPEED_MAX = 10;
+const MOVE_SPEED_MIN = 1;
+const MOVE_SPEED_MAX = 7;
 const SPAWN_CHANCE_MIN = 1;
 const SPAWN_CHANCE_MAX = 4;
 const SPAWN_SPEED = 1;
@@ -25,9 +25,9 @@ function step(timestamp) {
     const elapsed = timestamp - start;
 
     if (nextTick) {
-        if (0 < desiredSlideSteps) {
+        if (0 < desiredSlideSteps--) {
+            // log('batch count: ' + desiredSlideSteps);
             currentPresentationStack.shiftExe();
-            desiredSlideSteps--;
         }
     }
 

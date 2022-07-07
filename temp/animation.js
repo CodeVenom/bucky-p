@@ -67,6 +67,10 @@ function randomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
+function randomDeviation(range) {
+    return .5 * range - Math.random() * range;
+}
+
 function randomSpawnClass() {
     const classes = [
         'gamepad',
@@ -84,13 +88,3 @@ function randomSpawnClass() {
 function randomColorClass() {
     return 'color-' + (Math.floor(Math.random() * 6) % 6);
 }
-
-function cw() {
-    return document.body.clientWidth;
-}
-
-function ch() {
-    return document.body.clientHeight;
-}
-
-log = console.log;

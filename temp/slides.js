@@ -2,15 +2,31 @@
 const DEFAULT_STATUS_OPTIONS = {
     batchKey: undefined,
     invert: false,
+    maxOffset: 50,
+    maxRotation: 0,
 };
 
+// TODO: build reset stack automatically based on custom html attributes
 const RESET_STACK = [
     slide(0, invis),
     slide(0, flatten),
-    slideParts(0, invis_offset),
+    slideParts(0, invis_transform),
     slide(0, withOptions(invis).invert().result),
+
     slide(1, invis),
-    slidePartsNested(1, withOptions(shrink).batch('foo').result, 5),
+    slidePartsNested(1, withOptions(shrink).batch('schedule').result, 5),
+    slide(1, withOptions(invis).invert().result),
+
+    slide(2, invis),
+    slidePartsNested(2, withOptions(flatten).batch('release-day').result, 5),
+    slide(2, withOptions(invis).invert().result),
+
+    // slide(3, invis),
+    slidePartsNested(
+        3,
+        withOptions(invis_transform).batch('releases').maxOffset(12).maxRotation(3).result,
+        3
+    ),
 ];
 
 let presentationStack = [];
@@ -31,11 +47,15 @@ document.addEventListener('keypress', event => {
 });
 
 // - - - - - slides handling helper functions - - - - -
-function randomizedStatus(e, s) {
-    if (s.includes('offset')) {
-        const tx = randomInt(50) + 'px';
-        const ty = randomInt(50) + 'px';
-        e.style.transform = `translate(${tx},${ty})`;
+function randomizedStatus(e, o, s) {
+    const maxOffset = o.maxOffset;
+    const maxRotation = o.maxRotation;
+
+    if (s.includes('transform')) {
+        const tx = randomInt(maxOffset) + 'px';
+        const ty = randomInt(maxOffset) + 'px';
+        const r = randomDeviation(maxRotation * 2) + 'deg';
+        e.style.transform = `translate(${tx},${ty}) rotate(${r})`;
     }
 }
 
@@ -52,10 +72,12 @@ function pushStatusToBackStack(
             e.classList.remove.apply(e.classList, s);
         }
         flag = !flag;
-        randomizedStatus(e, s);
+        randomizedStatus(e, o, s);
     };
     f.slideOptions = o;
-    presentationBackStack.unshift(f);
+    // presentationBackStack.unshift(f);
+    // TODO: find a better way to determine id
+    f.slideOptions.id = presentationBackStack.unshift(f);
 }
 
 function flatten(e, o) {
@@ -82,12 +104,12 @@ function shrink(e, o) {
     );
 }
 
-function invis_offset(e, o) {
+function invis_transform(e, o) {
     pushStatusToBackStack(
         e,
         o,
         'invis',
-        'offset',
+        'transform',
     );
 }
 
@@ -108,6 +130,16 @@ function withOptions(f) {
         x.options.invert = true;
         return x;
     };
+
+    x.maxOffset = p => {
+        x.options.maxOffset = p;
+        return x;
+    }
+
+    x.maxRotation = p => {
+        x.options.maxRotation = p;
+        return x;
+    }
 
     return x;
 }
@@ -174,7 +206,7 @@ function slideStep(stack) {
     if (batchKey) {
         let counter = 0;
         for (const item of stack) {
-            if (item.slideOptions.batchKey) {
+            if (item.slideOptions.batchKey === batchKey) {
                 counter++;
             }
         }
